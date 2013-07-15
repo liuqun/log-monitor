@@ -1,0 +1,10 @@
+通过UDP协议发送软件调试信息，需要先安装socat
+
+发送端
+socat STDIN udp-sendto:localhost:8080
+
+接收端
+socat udp-recv:8080 STDOUT
+
+
+
