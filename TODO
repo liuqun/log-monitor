@@ -6,5 +6,16 @@ socat STDIN udp-sendto:localhost:8080
 接收端
 socat udp-recv:8080 STDOUT
 
+[详细工作流程]
+
+先打开用于接收调试信息的终端窗口，运行接收端socat udp-recv这条命令，端口号随意选择(以udp-recv:8080端口为例)。
+
+假定本机中被测试的可执行文件为helloworld.bin，我们通过管道将其输出信息发送到8080端口
+./helloworld.bin | socat STDIN udp-sendto:localhost:8080
+
+被调试的程序可能在运行中崩溃，这时就需要加上2>&1，把stderr重定向到stdout，便于检查崩溃信息
+./helloworld.bin 2>&1 | socat STDIN udp-sendto:localhost:8080
+
+如果需要长时间测试等待程序崩溃，则建议将接收端socat udp-recv命令改为接收并保存到一个日志文件，然后用tail -f命令查看。
 
 
