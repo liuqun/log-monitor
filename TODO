@@ -18,4 +18,7 @@ socat udp-recv:8080 STDOUT
 
 如果需要长时间测试等待程序崩溃，则建议将接收端socat udp-recv命令改为接收并保存到一个日志文件，然后用tail -f命令查看。
 
+[其他细节]
+单个接收端socat udp-recv命令可以同时收集多个发送端的日志输出，参见：
+http://www.dest-unreach.org/socat/doc/socat.html#ADDRESS_UDP_RECV
 
