@@ -23,7 +23,7 @@
  * }
  */
 typedef struct _PuzzlePiece *PuzzlePiece;
-extern PuzzlePiece CreateNewPuzzlePiece(int coordinate, int size, char *content);
+extern PuzzlePiece CreateNewPuzzlePiece(int position, int size, char *content);
 extern int DestroyPuzzlePiece(PuzzlePiece *p);
 
 

@@ -7,13 +7,13 @@
 #include "puzzle.h"
 
 struct _PuzzlePiece {
-    int coordinate;
+	int position;
 	int size;
 	char *content;
 };
 
 
-PuzzlePiece CreateNewPuzzlePiece(int coordinate, int initial_size, char *initial_content)
+PuzzlePiece CreateNewPuzzlePiece(int position, int initial_size, char *initial_content)
 {
     struct _PuzzlePiece *piece = NULL;
     char *content = NULL;
@@ -55,7 +55,7 @@ PuzzlePiece CreateNewPuzzlePiece(int coordinate, int initial_size, char *initial
         memcpy(content, initial_content, initial_size);
     }
 
-    piece->coordinate = coordinate;
+    piece->position = position;
     piece->size = initial_size;
     piece->content = content;
     return (piece);
@@ -195,7 +195,7 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
     struct _PuzzlePiece local;
     /*插入超长的拼图碎片时默认截断尾巴；新碎片内容将直接覆盖掉旧碎片*/
     char *to;
-    to = puzzle->content + piece->coordinate;
+    to = puzzle->content + piece->position;
     char *from;
     from = piece->content;
     int len;
@@ -205,14 +205,14 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
     assert(NULL!=piece);
     assert(NULL!=puzzle->content);
     assert(NULL!=piece->content);
-    assert(piece->coordinate >= 0);
+    assert(piece->position >= 0);
     assert(piece->size > 0);
     assert(puzzle->cnt <= puzzle->max && puzzle->cnt+1 <= puzzle->max*2);
     assert(NULL!=puzzle->pieces);
 
-    if (piece->coordinate + piece->size > puzzle->size)
+    if (piece->position + piece->size > puzzle->size)
     {
-        len = puzzle->size - piece->coordinate;
+        len = puzzle->size - piece->position;
     }
     memcpy(to, from, len);
 
@@ -231,9 +231,9 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
         puzzle->pieces = ptr;
         puzzle->max = puzzle->max*2;
     }
-    local.coordinate = piece->coordinate;
-    local.size       = piece->size;
-    local.content    = to; /* Only address is copied here */
+    local.position = piece->position;
+    local.size     = len;
+    local.content  = to; /* Only address is copied here */
     memcpy(puzzle->pieces + puzzle->cnt, &local, sizeof(local));
     puzzle->cnt += 1;
     assert(puzzle->cnt <= puzzle->max); /* check again */
