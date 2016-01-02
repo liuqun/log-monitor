@@ -105,6 +105,7 @@ int DestroyPuzzlePiece(PuzzlePiece *p)
 struct _Puzzle {
 	int size;
 	char *content;
+	int *refmap;/*refmap[i]反方向映射到碎片，i<size && refmap[i]<cnt。初始值refmap[i]=-1表示content[i]单元格此时没有填入拼图碎片，refmap[i]>=0表示链接到碎片pieces[refmap[i]]*/
 	int cnt;
 	int max;/*Max pieces*/
 	struct _PuzzlePiece *pieces;
@@ -114,6 +115,7 @@ Puzzle CreateNewPuzzle(int puzzle_size)
 {
     struct _Puzzle *puzzle = NULL;
     char *content = NULL;
+    int  *refmap   = NULL;
 
     puzzle = malloc(sizeof(struct _Puzzle));
     assert(NULL!=puzzle && "malloc() failed");
@@ -140,9 +142,21 @@ Puzzle CreateNewPuzzle(int puzzle_size)
             puzzle = NULL;
             return (NULL);
         }
+        refmap = calloc(sizeof(refmap[0]), puzzle_size);
+        assert(NULL!=refmap && "calloc() failed");
+        if (!refmap)
+        {
+            free(puzzle);
+            puzzle = NULL;
+            free(content);
+            content = NULL;
+            return (NULL);
+        }
+        memset(refmap, 0xFF, sizeof(refmap[0])*puzzle_size); // 0xFF即-1
     }
     puzzle->size = puzzle_size;
     puzzle->content = content;
+    puzzle->refmap = refmap;
     puzzle->cnt = 0;
     puzzle->max = 2;
     puzzle->pieces = calloc(puzzle->max, sizeof(struct _PuzzlePiece));
@@ -151,6 +165,8 @@ Puzzle CreateNewPuzzle(int puzzle_size)
     {
         free(content);
         puzzle->content = content = NULL;
+        free(refmap);
+        puzzle->refmap = refmap = NULL;
         free(puzzle);
         puzzle = NULL;
         return (NULL);
@@ -192,6 +208,8 @@ int DestroyPuzzle(Puzzle *p)
 
 void Insert(Puzzle puzzle, PuzzlePiece piece)
 {
+    int i;
+    int j;
     struct _PuzzlePiece local;
     /*插入超长的拼图碎片时默认截断尾巴；新碎片内容将直接覆盖掉旧碎片*/
     char *to;
@@ -235,6 +253,10 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
     local.size     = len;
     local.content  = to; /* Only address is copied here */
     memcpy(puzzle->pieces + puzzle->cnt, &local, sizeof(local));
+    for(i=piece->position,j=0; j<len; i++,j++)
+    {
+        puzzle->refmap[i] = puzzle->cnt;
+    }
     puzzle->cnt += 1;
     assert(puzzle->cnt <= puzzle->max); /* check again */
     return;
