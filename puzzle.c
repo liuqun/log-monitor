@@ -261,3 +261,36 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
     assert(puzzle->cnt <= puzzle->max); /* check again */
     return;
 }
+
+int PuzzlePieceExsitsAt(Puzzle puzzle, int position)
+{
+    const int FALSE = 0;
+
+    assert(NULL!=puzzle && "invalid object pointer");
+    if (!puzzle)
+    {
+        return (FALSE);
+    }
+    assert(position>=0 && position<puzzle->size && "safety check to avoid position overflow");
+    return (position >= 0 &&
+            position < puzzle->size &&
+            puzzle->refmap[position] >= 0);
+}
+
+inline int PuzzlePieceMissingAt(Puzzle puzzle, int position) { return(!PuzzlePieceExsitsAt(puzzle, position)); };
+
+int GetPositionOfTheFirstMissingPiece(Puzzle puzzle)
+{
+    int i;
+
+    for (i=0; i<puzzle->size; i++)
+    {
+        if (puzzle->refmap[i] < 0)
+        {
+            return (i);
+        }
+    }
+    return (-1); /* When all puzzle pieces are finished */
+}
+
+inline int PuzzleIsFinished(Puzzle puzzle) {return (GetPositionOfTheFirstMissingPiece(puzzle)<0);};

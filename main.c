@@ -14,8 +14,10 @@ void Log(char *from_file, int at_line, char *msg)
     }
     fprintf(stderr, "%s:%d:\n\t%s\n", from_file, at_line, msg);//#define DEBUG_PRINTF(...) fprintf(stderr, __VA_ARGS__)
 }
+
 void SolvePuzzle(Puzzle puzzle)
 {
+    int position;
     int at1 = 5, at2 = 0, at3 = 3;
     char *str1 = "FGHIJ";
     char *str2 = "ABC";
@@ -28,10 +30,14 @@ void SolvePuzzle(Puzzle puzzle)
     DestroyPuzzlePiece(&piece);
 
     /*检查缺少哪一块拼图*/
-    /*填补缺少的一块拼图*/
-    piece = CreateNewPuzzlePiece(at3, strlen(str3), str3);
-    Insert(puzzle, piece);
-    DestroyPuzzlePiece(&piece);
+    position = GetPositionOfTheFirstMissingPiece(puzzle);
+    if (PuzzlePieceMissingAt(puzzle, position))
+    {
+        /*填补缺少的一块拼图*/
+        piece = CreateNewPuzzlePiece(at3, strlen(str3), str3);
+        Insert(puzzle, piece);
+        DestroyPuzzlePiece(&piece);
+    }
 
     return;
 }
