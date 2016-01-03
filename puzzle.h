@@ -43,8 +43,8 @@ extern int PuzzlePieceExsitsAt(Puzzle puzzle, int position);
 extern int PuzzlePieceMissingAt(Puzzle puzzle, int position);
 extern int GetPositionOfTheFirstMissingPiece(Puzzle puzzle);
 extern int PuzzleIsFinished(Puzzle puzzle);
+extern int GetPuzzleSize(Puzzle puzzle);
 //extern void CollectPieces(Puzzle puzzle, PuzzlePiece pieces[], int cnt);
-//extern size_t GetPuzzleSize(Puzzle puzzle);
 //extern int CheckPuzzleIntegrity(Puzzle puzzle);
 
 

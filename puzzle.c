@@ -111,6 +111,16 @@ struct _Puzzle {
 	struct _PuzzlePiece *pieces;
 };
 
+extern int GetPuzzleSize(Puzzle puzzle)
+{
+    assert(NULL!=puzzle && "invalid object pointer");
+    if (!puzzle)
+    {
+        return (-1); /* Error */
+    }
+    return (puzzle->size);
+}
+
 Puzzle CreateNewPuzzle(int puzzle_size)
 {
     struct _Puzzle *puzzle = NULL;
