@@ -31,9 +31,9 @@ extern int DestroyPuzzlePiece(PuzzlePiece *p);
  * Public Class: Puzzle
  * -------------------------
  * Example Usage:
- * Puzzle puzzle = CreateNewPuzzle();
+ * Puzzle puzzle = CreateNewPuzzle(PUZZLE_SIZE);
  * ...
- * DestoryPuzzle(puzzle);
+ * DestoryPuzzle(&puzzle);
  */
 typedef struct _Puzzle *Puzzle;
 extern Puzzle CreateNewPuzzle(int puzzle_size);
@@ -44,8 +44,6 @@ extern int PuzzlePieceMissingAt(Puzzle puzzle, int position);
 extern int GetPositionOfTheFirstMissingPiece(Puzzle puzzle);
 extern int PuzzleIsFinished(Puzzle puzzle);
 extern int GetPuzzleSize(Puzzle puzzle);
-//extern void CollectPieces(Puzzle puzzle, PuzzlePiece pieces[], int cnt);
-//extern int CheckPuzzleIntegrity(Puzzle puzzle);
 
 
 
