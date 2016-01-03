@@ -18,6 +18,9 @@ void Log(char *from_file, int at_line, char *msg)
 void SolvePuzzle(Puzzle puzzle)
 {
     int position;
+    int size;
+    int i;
+    int len;
     int at1 = 5, at2 = 0, at3 = 3;
     char *str1 = "FGHIJ";
     char *str2 = "ABC";
@@ -30,9 +33,15 @@ void SolvePuzzle(Puzzle puzzle)
     DestroyPuzzlePiece(&piece);
 
     /*检查缺少哪一块拼图*/
+    size     = GetPuzzleSize(puzzle);
     position = GetPositionOfTheFirstMissingPiece(puzzle);
-    if (PuzzlePieceMissingAt(puzzle, position))
+    if (position>=0 && position<size)
     {
+        for (i=position+1; i<size&&PuzzlePieceMissingAt(puzzle, i); i++)
+        {
+            ;
+        }
+        len = i-position;
         /*填补缺少的一块拼图*/
         piece = CreateNewPuzzlePiece(at3, strlen(str3), str3);
         Insert(puzzle, piece);
