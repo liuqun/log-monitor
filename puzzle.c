@@ -282,13 +282,28 @@ inline int PuzzlePieceMissingAt(Puzzle puzzle, int position) { return(!PuzzlePie
 int GetPositionOfTheFirstMissingPiece(Puzzle puzzle)
 {
     int i;
+    struct _PuzzlePiece *p=NULL;
 
-    for (i=0; i<puzzle->size; i++)
+    assert(NULL!=puzzle && "invalid object pointer");
+    if (!puzzle)
+    {
+        return (-1);
+    }
+    i = 0;
+    while (i<puzzle->size)
     {
         if (puzzle->refmap[i] < 0)
         {
             return (i);
         }
+        assert(NULL!=puzzle->pieces && "invalid object pointer");
+        assert(NULL!=puzzle->refmap && "invalid object pointer");
+        assert(i < puzzle->size && "check index overflow");
+        assert(puzzle->refmap[i]>=0 && (puzzle->refmap[i] < puzzle->cnt) && "check index overflow");
+        assert(puzzle->cnt <= puzzle->max && "check puzzle piece index");
+        p = &(puzzle->pieces[puzzle->refmap[i]]);
+        assert(NULL!=p && "invalid object pointer");
+        i = p->position + p->size; /* goto next puzzle piece */
     }
     return (-1); /* When all puzzle pieces are finished */
 }
