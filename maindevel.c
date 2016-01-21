@@ -159,11 +159,17 @@ const char *MoveToNextRecordFromSource(const char *src, int len)
 void SEND_DATA(int position, int len, char *data)
 {
     int i;
+    const int MASK=0x00ff;
+    assert(position>=0 && len>0);
+    if (position<0 || len<=0)
+    {
+        abort();
+    }
     printf("%d:", position);
     printf("%d:", len);
     for (i=0; i<len; i++)
     {
-        printf("%02X", data[i]);
+        printf("%02X", data[i]&MASK);
     }
     printf("\n");
     return;
