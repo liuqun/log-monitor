@@ -156,6 +156,18 @@ const char *MoveToNextRecordFromSource(const char *src, int len)
     }
     return (src);
 }
+void SEND_DATA(int position, int len, char *data)
+{
+    int i;
+    printf("%d:", position);
+    printf("%d:", len);
+    for (i=0; i<len; i++)
+    {
+        printf("%02X", data[i]);
+    }
+    printf("\n");
+    return;
+}
 int main()
 {
     const int PZZL_SIZ = 15;
@@ -163,13 +175,16 @@ int main()
     char *const str1 = "FGHIJKLMNO";
     char *const str2 = "ABC";
     char *const str3 = "DE";
-
-    DEBUG_LOG("--BEGIN--");
     char source[] =
         "5:5:464748494A4B4C4D4E4F\n"
         "0:3:414243\n"
         "3:2:4445\n"
         ;
+
+    DEBUG_LOG("--BEGIN--");
+    SEND_DATA(at1, strlen(str1), str1);
+    SEND_DATA(at2, strlen(str2), str2);
+    SEND_DATA(at3, strlen(str3), str3);
     int v=IntegerValueFromHexCh('f');
     DEBUG_LOG("---END---");
     return (0);
