@@ -12,28 +12,29 @@ struct _PuzzlePiece {
 	char *content;
 };
 
+static void ErrorAbort(char errmsg[]);
 
 PuzzlePiece CreateNewPuzzlePiece(int position, int initial_size, char *initial_content)
 {
     struct _PuzzlePiece *piece = NULL;
-    char *content = NULL;
+    char *content;
 
     piece = malloc(sizeof(struct _PuzzlePiece));
     assert(NULL!=piece && "malloc() failed");
     if (!piece)
     {
-        return (NULL);
+        ErrorAbort("Error: Not enough memory");
+        return (UNDEFINED_PUZZLE_PIECE);
     }
 #   ifdef DEBUG
     memset(piece, 0x00, sizeof(struct _PuzzlePiece));
 #   endif/*DEBUG*/
 
-    content = NULL;
     assert(initial_size >= 0 && "initial piece size must >= 0");
     if (initial_size <= 0)
     {
         initial_size = 0;
-        content = NULL;
+        content = UNDEFINED_CHAR_PTR;
     }else
     {
         content = malloc(initial_size);
@@ -41,8 +42,8 @@ PuzzlePiece CreateNewPuzzlePiece(int position, int initial_size, char *initial_c
         if(!content)
         {
             free(piece);
-            piece = NULL;
-            return(NULL);
+            ErrorAbort("Error: Not enough memory");
+            return (UNDEFINED_PUZZLE_PIECE);
         }
     }
 
@@ -68,26 +69,23 @@ int DestroyPuzzlePiece(PuzzlePiece *p)
     assert(NULL!=p && "invalid input parameter");
     if (!p)
     {
+        ErrorAbort("Error: Invalid parameter detected");
         return (-1);
     }
-
     piece = *p;
-    assert(NULL!=piece && "memory not allocated or already freed");
-    if (!piece)
+    assert(NULL!=piece && UNDEFINED_PUZZLE_PIECE!=piece && "memory not allocated or already freed");
+    if (!piece || UNDEFINED_PUZZLE_PIECE==piece)
     {
+        ErrorAbort("Error: Invalid parameter detected");
         return (-2);
     }
 
-    if (NULL!=piece->content)
+    if (NULL!=piece->content && UNDEFINED_CHAR_PTR!=piece->content )
     {
         free(piece->content);
     }
-#   ifdef DEBUG
-    piece->content = NULL;
-    piece->size = 0;
-#   endif/*DEBUG*/
     free(piece);
-    piece = *p = NULL;
+    piece = *p = UNDEFINED_PUZZLE_PIECE;
     return (0);
 }
 
@@ -114,9 +112,11 @@ struct _Puzzle {
 extern int GetPuzzleSize(Puzzle puzzle)
 {
     assert(NULL!=puzzle && "invalid object pointer");
-    if (!puzzle)
+    assert(UNDEFINED_PUZZLE!=puzzle && "UNDEFINED_OBJECT_PTR detected");
+    if (!puzzle || UNDEFINED_PUZZLE==puzzle)
     {
-        return (-1); /* Error */
+        ErrorAbort("Error: Invalid parameter detected");
+        return (-1);
     }
     return (puzzle->size);
 }
@@ -131,7 +131,8 @@ Puzzle CreateNewPuzzle(int puzzle_size)
     assert(NULL!=puzzle && "malloc() failed");
     if (!puzzle)
     {
-        return (NULL);
+        ErrorAbort("Error: Not enough memory");
+        return (UNDEFINED_PUZZLE);
     }
 #   ifdef DEBUG
     memset(puzzle, 0x00, sizeof(struct _Puzzle));
@@ -140,8 +141,7 @@ Puzzle CreateNewPuzzle(int puzzle_size)
     assert(puzzle_size > 0 && "invalid initial puzzle size");
     if (puzzle_size <= 0)
     {
-        puzzle_size = 0;
-        content = NULL;
+        return (UNDEFINED_PUZZLE);
     }else
     {
         content = malloc(puzzle_size);
@@ -149,18 +149,17 @@ Puzzle CreateNewPuzzle(int puzzle_size)
         if (!content)
         {
             free(puzzle);
-            puzzle = NULL;
-            return (NULL);
+            ErrorAbort("Error: Not enough memory for content string");
+            return (UNDEFINED_PUZZLE);
         }
         refmap = calloc(sizeof(refmap[0]), puzzle_size);
         assert(NULL!=refmap && "calloc() failed");
         if (!refmap)
         {
             free(puzzle);
-            puzzle = NULL;
             free(content);
-            content = NULL;
-            return (NULL);
+            ErrorAbort("Error: Not enough memory for refmap");
+            return (UNDEFINED_PUZZLE);
         }
         memset(refmap, 0xFF, sizeof(refmap[0])*puzzle_size); // 0xFF即-1
     }
@@ -174,12 +173,10 @@ Puzzle CreateNewPuzzle(int puzzle_size)
     if (!puzzle->pieces)
     {
         free(content);
-        puzzle->content = content = NULL;
         free(refmap);
-        puzzle->refmap = refmap = NULL;
         free(puzzle);
-        puzzle = NULL;
-        return (NULL);
+        ErrorAbort("Error: Not enough memory for pieces array");
+        return (UNDEFINED_PUZZLE);
     }
     return (puzzle);
 }
@@ -191,28 +188,26 @@ int DestroyPuzzle(Puzzle *p)
     assert(NULL!=p && "invalid input parameter");
     if (!p)
     {
+        ErrorAbort("Error: NULL PTR detected");
         return (-1);
     }
     puzzle = *p;
-    assert(NULL!=puzzle && "memory not allocated or already freed");
-    if (!puzzle)
+    assert(NULL!=puzzle && UNDEFINED_PUZZLE!=puzzle && "puzzle invalid or already destroyed");
+    if (!puzzle || UNDEFINED_PUZZLE==puzzle)
     {
+        ErrorAbort("Error: invalid input parameter detected");
         return (-2);
     }
-    if (puzzle->size > 0 && NULL != puzzle->content)
+    if (puzzle->size > 0 && NULL != puzzle->content && UNDEFINED_CHAR_PTR != puzzle->content)
     {
         free(puzzle->content);
     }
-    puzzle->content = NULL;
-    puzzle->size = 0;
-    if (puzzle->max > 0 && NULL != puzzle->pieces)
+    if (puzzle->max > 0 && NULL != puzzle->pieces  && UNDEFINED_PUZZLE_PIECE != puzzle->pieces)
     {
         free(puzzle->pieces);
     }
-    puzzle->cnt = puzzle->max = 0;
-    puzzle->pieces = NULL;
     free(puzzle);
-    puzzle = *p = NULL;
+    puzzle = *p = UNDEFINED_PUZZLE;
     return (0);
 }
 
@@ -252,6 +247,7 @@ void Insert(Puzzle puzzle, PuzzlePiece piece)
         assert(NULL != ptr && "calloc() failed");
         if (!ptr)
         {
+            ErrorAbort("Error: Not enough memory for piece array");
             return;
         }
         memcpy(ptr, puzzle->pieces, puzzle->cnt*(sizeof(struct _PuzzlePiece)));
@@ -277,7 +273,12 @@ int PuzzlePieceExsitsAt(Puzzle puzzle, int position)
     const int FALSE = 0;
 
     assert(NULL!=puzzle && "invalid object pointer");
+    assert(UNDEFINED_PUZZLE!=puzzle && "invalid input");
     if (!puzzle)
+    {
+        ErrorAbort("Error: NULL pointer detected");
+        return (FALSE);
+    }else if (UNDEFINED_PUZZLE==puzzle)
     {
         return (FALSE);
     }
@@ -285,6 +286,7 @@ int PuzzlePieceExsitsAt(Puzzle puzzle, int position)
     return (position >= 0 &&
             position < puzzle->size &&
             puzzle->refmap[position] >= 0);
+    /* FIXME: Forget to check puzzle->refmap pointer safety */
 }
 
 inline int PuzzlePieceMissingAt(Puzzle puzzle, int position) { return(!PuzzlePieceExsitsAt(puzzle, position)); };
@@ -292,12 +294,16 @@ inline int PuzzlePieceMissingAt(Puzzle puzzle, int position) { return(!PuzzlePie
 int GetPositionOfTheFirstMissingPiece(Puzzle puzzle)
 {
     int i;
-    struct _PuzzlePiece *p=NULL;
+    struct _PuzzlePiece *p;
 
     assert(NULL!=puzzle && "invalid object pointer");
     if (!puzzle)
     {
-        return (-1);
+        ErrorAbort("Error: NULL pointer detected");
+        return (-3);
+    }else if (UNDEFINED_PUZZLE==puzzle)
+    {
+        return (-2);
     }
     i = 0;
     while (i<puzzle->size)
@@ -319,3 +325,34 @@ int GetPositionOfTheFirstMissingPiece(Puzzle puzzle)
 }
 
 inline int PuzzleIsFinished(Puzzle puzzle) {return (GetPositionOfTheFirstMissingPiece(puzzle)<0);};
+
+/**
+ * Error handling stuff
+ * --------------------
+ * The following pointers are used when faild to create new objects:
+ * UNDEFINED_OBJECT_PTR
+ * UNDEFINED_PUZZLE_PIECE
+ * UNDEFINED_PUZZLE
+ */
+union _OBJECT {
+    struct _PuzzlePiece piece;
+    struct _Puzzle      puzzle;
+    char                byte;
+};
+static union _OBJECT undefined_object={/* Just leave initial value undefined here*/};
+void *const UNDEFINED_OBJECT_PTR = &undefined_object;
+char *const UNDEFINED_CHAR_PTR   = &(undefined_object.byte); // This is used only for debugging
+Puzzle const UNDEFINED_PUZZLE    = &(undefined_object.puzzle);
+PuzzlePiece const UNDEFINED_PUZZLE_PIECE = &(undefined_object.piece);
+
+/**
+ * Function: ErrorAbort()
+ * Usage: ErrorAbort("Fatal error: Something happened...");
+ * --------------------------------------------------------
+ * Report an error message then abort immediately.
+ */
+static void ErrorAbort(char errmsg[])
+{
+    (void) errmsg;// TODO: Report the error message, anyway...
+    abort();
+}
